@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "fast-glob": "^3.3.2",
+    "xml-js": "^1.6.11"
+  },
+  "type": "module",
+  "prettier": {
+    "tabWidth": 4,
+    "singleQuote": true,
+    "semi": true,
+    "printWidth": 120
+  }
+}
