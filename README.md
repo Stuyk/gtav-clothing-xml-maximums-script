@@ -1,4 +1,4 @@
-# Clothing XML Maximums
+# GTA:V Clothing XML Maximums
 
 Parses `.xml` files and returns maximums for clothing and props.
 
@@ -7,7 +7,7 @@ Parses `.xml` files and returns maximums for clothing and props.
 1. Export `ymt` files as `xml`
 2. Load files into the folder called `files`
 3. Run this script
-4. Data spit out to `cltohes.json`
+4. Data spit out to `clothes.json`
 
 Enjoy.
 
