@@ -23,9 +23,7 @@ function cleanup(dlcName) {
     }
 }
 
-async function test() {
-    console.log(files);
-
+async function build() {
     for (let file of files) {
         const data = xml.xml2js(fs.readFileSync(file, 'utf-8'), {
             compact: true,
@@ -68,56 +66,56 @@ async function test() {
             };
         }
 
-        for (let item of data.CPedVariationInfo.compInfos.Item) {
-            const component = item.pedXml_compIdx._attributes.value;
-            const drawable = item.pedXml_drawblIdx._attributes.value;
-            if (componentData[dlcName].clothes[component] > drawable) {
-                continue;
-            }
+        // Handle Item Processing
+        if (Array.isArray(data.CPedVariationInfo.compInfos.Item)) {
+            for (let item of data.CPedVariationInfo.compInfos.Item) {
+                const component = item.pedXml_compIdx._attributes.value;
+                const drawable = item.pedXml_drawblIdx._attributes.value;
+                if (componentData[dlcName].clothes[component] > drawable) {
+                    continue;
+                }
 
-            componentData[dlcName].clothes[component] = parseInt(drawable) + 1;
+                componentData[dlcName].clothes[component] = parseInt(drawable) + 1;
+            }
+        } else {
+            if (data.CPedVariationInfo.compInfos.Item) {
+                const item = data.CPedVariationInfo.compInfos.Item;
+                const component = item.pedXml_compIdx._attributes.value;
+                const drawable = item.pedXml_drawblIdx._attributes.value;
+                if (componentData[dlcName].clothes[component] < drawable) {
+                    componentData[dlcName].clothes[component] = parseInt(drawable) + 1;
+                }
+            }
         }
 
-        if (!Array.isArray(data.CPedVariationInfo.propInfo.aPropMetaData.Item)) {
-            if (!data.CPedVariationInfo.propInfo.aPropMetaData) {
-                cleanup(dlcName);
-                continue;
+        // Handle Prop Processing
+        if (Array.isArray(data.CPedVariationInfo.propInfo.aPropMetaData.Item)) {
+            for (let prop of data.CPedVariationInfo.propInfo.aPropMetaData.Item) {
+                const component = prop.anchorId._attributes.value;
+                const drawable = prop.propId._attributes.value;
+
+                if (componentData[dlcName].props[component] > drawable) {
+                    continue;
+                }
+
+                componentData[dlcName].props[component] = parseInt(drawable) + 1;
             }
-
-            if (!data.CPedVariationInfo.propInfo.aPropMetaData.Item) {
-                cleanup(dlcName);
-                continue;
+        } else {
+            if (data.CPedVariationInfo.propInfo.aPropMetaData.Item) {
+                const prop = data.CPedVariationInfo.propInfo.aPropMetaData.Item;
+                const component = prop.anchorId._attributes.value;
+                const drawable = prop.propId._attributes.value;
+                if (componentData[dlcName].props[component] < drawable) {
+                    componentData[dlcName].props[component] = parseInt(drawable) + 1;
+                }
             }
-
-            const prop = data.CPedVariationInfo.propInfo.aPropMetaData.Item;
-            const component = prop.anchorId._attributes.value;
-            const drawable = prop.propId._attributes.value;
-
-            if (componentData[dlcName].props[component] > drawable) {
-                cleanup(dlcName);
-                continue;
-            }
-
-            componentData[dlcName].props[component] = parseInt(drawable) + 1;
-            cleanup(dlcName);
-            continue;
         }
 
-        for (let prop of data.CPedVariationInfo.propInfo.aPropMetaData.Item) {
-            const component = prop.anchorId._attributes.value;
-            const drawable = prop.propId._attributes.value;
-
-            if (componentData[dlcName].props[component] > drawable) {
-                continue;
-            }
-
-            componentData[dlcName].props[component] = parseInt(drawable) + 1;
-        }
-
+        // Cleanup Empty Entries
         cleanup(dlcName);
     }
 
     fs.writeFileSync('clothes.json', JSON.stringify(componentData, null, '\t'));
 }
 
-test();
+build();
